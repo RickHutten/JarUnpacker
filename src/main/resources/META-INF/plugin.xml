@@ -1,0 +1,11 @@
+<idea-plugin>
+    <id>io.github.rickhutten.jarunpacker</id>
+    <name>JarUnpacker</name>
+    <vendor>Rick Hutten</vendor>
+
+    <description><![CDATA[
+        Extract local JAR files into clean sibling directories from IntelliJ IDEA's Project View.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+</idea-plugin>
