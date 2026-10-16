@@ -10,43 +10,37 @@
 
 ## Working principles
 
-- Keep changes focused on the requested task; avoid unrelated refactoring.
-- Do not invent requirements. Ask the user when an unresolved decision affects scope, behavior, security, architecture, or data.
-- Inspect existing code and configuration before changing them.
-- Prefer small, reviewable changes backed by automated tests.
-- Fix root causes rather than suppressing errors or hiding warnings.
-- Never commit, push, or rewrite Git history unless explicitly asked.
-- Never store credentials, tokens, personal data, secrets, or local environment files in Git.
-- Preserve existing public contracts unless the requested change explicitly requires a breaking change.
+- Inspect existing code and configuration before changing them; follow established conventions.
+- Keep changes focused, reviewable, and backed by automated tests; fix root causes rather than hiding warnings.
+- Do not invent requirements or silently expand scope. Ask when an unresolved decision affects behavior, architecture, security, data, or compatibility.
+- Never commit, push, or rewrite Git history. The user handles commits and pushes.
+- Never store credentials, personal data, secrets, or local environment files in Git.
+- Preserve existing public contracts unless a breaking change is explicitly approved.
 
 ### Scope discipline
 
 - Implement only behavior required by the approved task and exercised by a current caller, user flow, or public boundary.
 - Do not add speculative abstractions, future-facing integrations, unused APIs, or code for a later task.
-- Before adding a class, function, module, endpoint, adapter, or abstraction, identify the current caller or public boundary it supports and the test that proves its behavior. If neither exists, do not add it.
+- Before adding an abstraction, identify its caller or public boundary and the test that proves it. If neither exists, do not add it.
 - Do not use unused-code suppressions to hide dead code. Remove dead code instead.
-- Keep future behavior in the issue, story, or implementation plan until the task that consumes it is implemented.
+- Keep future behavior in the issue, story, or implementation plan until the task that consumes it exists.
 
 ## Decision-making with the user
 
-- Ask before making an impactful decision instead of choosing silently.
-- Treat changes to architecture, persistence, public APIs, security, data handling, compatibility, and user-visible behavior as impactful.
-- Routine implementation details may follow existing repository conventions without asking.
+- Ask before making an impactful decision. This includes architecture, persistence, public APIs, security, data handling, compatibility, and user-visible behavior.
+- Routine implementation details may follow existing repository conventions.
 - If an impactful decision becomes necessary during implementation, pause and ask for direction.
 
 ## Planning and implementation workflow
 
 For non-trivial work:
 
-1. Discuss and refine the request and acceptance criteria.
+1. Refine the request and acceptance criteria.
 2. Inspect the relevant code, tests, documentation, and configuration.
-3. Write a concise implementation plan with concrete, testable steps when the repository has a planning convention; otherwise keep the plan in the task discussion.
-4. Ask for approval before implementation when the work involves unresolved product, architecture, scope, security, or behavior decisions.
-5. Implement behavior through the smallest suitable change, writing behavior-focused tests first when practical.
-6. Refactor only after the required behavior is working and verified.
-7. Update documentation when the change introduces a lasting user-facing, operational, or architectural decision.
+3. Make a concise, testable plan and get approval for unresolved impactful decisions.
+4. Implement the smallest suitable change, test it, then refactor and update lasting documentation.
 
-Do not silently expand scope while planning or implementing. Record unresolved decisions and stop for user input when they affect behavior.
+Record unresolved decisions and stop for user input when they affect behavior.
 
 ## Orchestrator-first development
 
@@ -74,45 +68,32 @@ For every approved non-trivial coding task or multi-scenario test improvement:
 
 ## Code and architecture conventions
 
-- Follow the repository's existing architecture and dependency boundaries.
-- Keep domain or business logic separate from delivery mechanisms and infrastructure when the project uses those boundaries.
-- Validate input at system boundaries and keep semantic or cross-record validation in the appropriate domain or application layer.
-- Keep controllers, handlers, routes, and UI components thin when the architecture separates presentation from application logic.
-- Keep external-provider parsing, translation, retries, and provider-specific behavior in the owning integration adapter.
-- Prefer type-safe, centralized configuration over scattered literals or environment lookups.
-- Use the repository's established dependency-injection, error-handling, logging, persistence, and migration conventions.
+- Follow existing architecture and dependency boundaries; keep domain logic separate from delivery and infrastructure where those boundaries exist.
+- Validate at system boundaries, keep delivery components thin, and place semantic or cross-record validation in the appropriate domain/application layer.
+- Keep provider-specific parsing, translation, retries, and errors in the owning adapter.
+- Prefer centralized, type-safe configuration and established DI, logging, persistence, migration, and error-handling conventions.
 - Do not introduce a new library, framework, pattern, or abstraction when existing project facilities are sufficient.
 
 ## Testing conventions
 
-- Follow the testing strategy already established by the repository; if none exists, prioritize tests through stable public boundaries.
-- Emphasize integration or component tests for behavior crossing meaningful boundaries, use end-to-end tests for critical user journeys, and keep unit tests focused on complex isolated logic.
-- Test observable behavior rather than implementation details so tests remain useful during refactoring.
-- Keep tests deterministic, isolated, and automated. Do not rely on manual checks for completion.
-- Prefer a small number of high-value tests over a large suite of narrow, mock-heavy interaction tests.
-- Use small user-defined fakes, stubs, or test adapters when test doubles are needed. Follow the repository's policy on mocking frameworks.
-- Reuse composable scenario builders or fixtures for stateful setup when they improve clarity, and ensure each test starts from a known state.
-- For behavior changes, write the appropriate functional or integration test before implementation when practical and confirm it fails for the expected reason.
-
-### TDD sequence
-
-For each behavior change, when practical:
-
-1. Write a test for behavior explicitly required by the task and exercised through a public boundary.
-2. Run it and confirm it fails for the expected missing-behavior reason.
-3. Implement only the code needed to make the test pass.
-4. Run the focused tests green.
-5. Refactor for clarity and justified reuse without adding new behavior.
-6. Add focused unit tests only where the implemented logic is complex or has meaningful input permutations not covered by broader tests.
-
-Do not add production code or tests that lack a current caller, public boundary, or direct connection to implemented behavior.
+- Follow the repository's strategy; prefer integration/component tests through stable public boundaries, with end-to-end tests for critical journeys and unit tests for complex isolated logic.
+- Test observable behavior, not implementation details. Keep tests deterministic, isolated, automated, and focused on high-value cases.
+- Prefer user-defined fakes, stubs, fixtures, and scenario builders over narrow mock-heavy tests.
+- For behavior changes, write a failing test first when practical, implement the smallest change, run focused tests, then refactor.
+- Do not add production code or tests without a current caller, public boundary, or direct connection to implemented behavior.
 
 ## Verification and completion
 
-Before calling work complete:
+Before calling work complete, run the relevant tests, linters, formatters, type checks, and build/packaging checks; report their actual results. Inspect the final diff and status for unintended changes, secrets, generated files, and missing tests. Update lasting documentation and mention unresolved risks or follow-up work.
 
-1. Run the repository's relevant tests, linters, formatters, type checks, and build or packaging checks.
-2. Report the commands run and their actual results.
-3. Inspect the final diff and repository status for unintended changes, secrets, generated files, or missing tests.
-4. Update relevant documentation if the change introduced a lasting decision.
-5. Mention unresolved risks, limitations, or follow-up work.
+## Project-specific guidance
+
+- This is a Kotlin IntelliJ Platform plugin targeting IDEA `2026.2.2`; use `./gradlew` and preserve plugin ID `io.github.rickhutten.jarunpacker`.
+- Supported verification: `./gradlew test`, `./gradlew build`, `./gradlew verifyPluginStructure`, `./gradlew buildPlugin`, and `./gradlew verifyPlugin`. `./gradlew runIde` is manual exploratory testing only.
+- Register actions through supported `plugin.xml` extension points. Use Project View and VFS APIs, keep `update()` cheap and side-effect-free, and preserve normal JAR double-click behavior.
+- Do not perform archive extraction or filesystem traversal on the UI thread; refresh Project View/VFS through the appropriate platform mechanisms.
+- Keep user-facing text localizable and do not add dependencies when an existing IntelliJ Platform or JDK API is sufficient.
+
+For JAR extraction, test selection eligibility, nested files, clean replacement, traversal/absolute-entry protection, failure handling, Project View refresh, and non-UI-thread execution. Prefer deterministic platform/component tests with small JAR fixtures.
+
+Do not change the plugin ID, vendor, target version, or distribution metadata without explicit approval.
